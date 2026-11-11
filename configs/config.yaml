@@ -1,0 +1,90 @@
+# ==============================================================================
+# GeoFinBERT Configuration File
+# Academic Research Pipeline: Adapting FinBERT for Geopolitical & Energy Markets
+# ==============================================================================
+
+project:
+  name: "GeoFinBERT"
+  version: "1.0.0"
+  description: "Domain-adaptive pretraining and human-supervised sentiment fine-tuning on geopolitical and energy-market news."
+  seed: 42
+
+domain:
+  topics:
+    - "oil_crude_markets"
+    - "gold_bullion_markets"
+    - "us_iran_relations"
+    - "middle_east_geopolitics"
+  historical_start: "2000-01-01"
+  historical_end: "2026-11-11"
+
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  splits_dir: "data/splits"
+  deduplication:
+    method: "exact_and_minhash"
+    similarity_threshold: 0.85
+  splits:
+    train_ratio: 0.70
+    val_ratio: 0.15
+    test_ratio: 0.15
+    strict_chronological: true
+
+model:
+  base_model_name: "ProsusAI/finbert"
+  tokenizer_name: "ProsusAI/finbert"
+  max_seq_length: 128
+  num_labels: 3
+  label2id:
+    positive: 0
+    negative: 1
+    neutral: 2
+  id2label:
+    0: "positive"
+    1: "negative"
+    2: "neutral"
+
+stage1_dapt:
+  output_dir: "models/checkpoints/GeoFinBERT-DAPT"
+  mlm_probability: 0.15
+  num_train_epochs: 3
+  per_device_train_batch_size: 16
+  per_device_eval_batch_size: 32
+  learning_rate: 3.0e-5
+  weight_decay: 0.01
+  warmup_ratio: 0.10
+  logging_steps: 25
+  save_steps: 100
+  eval_steps: 100
+  evaluation_strategy: "steps"
+  save_total_limit: 2
+  fp16: true
+  dataloader_num_workers: 2
+
+stage2_finetuning:
+  baseline_output_dir: "models/checkpoints/FinBERT-Baseline"
+  adapted_output_dir: "models/checkpoints/GeoFinBERT"
+  use_class_weights: true
+  class_weight_method: "balanced"
+  num_train_epochs: 4
+  per_device_train_batch_size: 16
+  per_device_eval_batch_size: 32
+  learning_rate: 2.0e-5
+  weight_decay: 0.01
+  warmup_ratio: 0.10
+  early_stopping_patience: 3
+  metric_for_best_model: "macro_f1"
+  greater_is_better: true
+  logging_steps: 20
+  eval_steps: 50
+  evaluation_strategy: "steps"
+  save_total_limit: 2
+  fp16: true
+  dataloader_num_workers: 2
+
+inference:
+  device: "auto"
+  batch_size: 32
+  export_format: "pytorch"
+
