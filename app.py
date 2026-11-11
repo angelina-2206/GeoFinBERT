@@ -101,3 +101,4 @@ if st.button("Analyze Sentiment", type="primary"):
 
 st.markdown("---")
 st.markdown("Academic Research Paper: **GeoFinBERT** | [GitHub Repository](https://github.com/angelina-2206/GeoFinBERT)")
+

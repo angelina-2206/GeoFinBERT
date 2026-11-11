@@ -29,3 +29,4 @@ jobs:
     - name: Run Schema Audit & Smoke Test
       run: |
         python scripts/run_smoke_test.py
+
